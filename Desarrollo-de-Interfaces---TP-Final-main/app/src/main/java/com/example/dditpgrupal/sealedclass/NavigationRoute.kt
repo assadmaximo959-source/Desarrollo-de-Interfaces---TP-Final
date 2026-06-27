@@ -26,5 +26,5 @@ sealed class NavigationRoute(
 
     object Messages : NavigationRoute("messages", "Mensajes", Icons.Filled.Email)
 
-    object ProfileInfo : NavigationRoute("profile_info", "Perfil", Icons.Filled.Person)
+    object ProfileInfo : NavigationRoute("profile", "Perfil", Icons.Filled.Person)
 }

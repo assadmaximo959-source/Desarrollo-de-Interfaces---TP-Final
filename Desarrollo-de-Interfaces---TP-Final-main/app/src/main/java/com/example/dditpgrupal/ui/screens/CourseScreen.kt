@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.example.dditpgrupal.data.Course
 import com.example.dditpgrupal.data.dummyCourseList
 import com.example.dditpgrupal.ui.components.CourseCard
+import com.example.dditpgrupal.ui.components.CourseDetails
 
 @Suppress("ktlint:standard:function-naming")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -50,8 +52,8 @@ fun CourseScreen(
     courseList: List<Course> = dummyCourseList,
     onCourseClick: (Int) -> Unit = {},
 ) {
-    var isSearchActive by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
+    var infoCourseIndex by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         topBar = {
@@ -99,13 +101,6 @@ fun CourseScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { isSearchActive = !isSearchActive }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
@@ -128,17 +123,31 @@ fun CourseScreen(
                 courseList.filter { it.name.contains(searchText, ignoreCase = true) }
             }
 
-        LazyColumn(
-            modifier =
-                Modifier
+        if (infoCourseIndex != null) {
+            Column(
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(filteredCourses.indices.toList(), key = { filteredCourses[it].commission }) { index ->
-                val originalIndex = courseList.indexOf(filteredCourses[index])
-                CourseCard(course = filteredCourses[index], onClick = { onCourseClick(originalIndex) })
+            ) {
+                CourseDetails(course = courseList[infoCourseIndex!!])
+            }
+        } else {
+            LazyColumn(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(filteredCourses.indices.toList(), key = { filteredCourses[it].commission }) { index ->
+                    val originalIndex = courseList.indexOf(filteredCourses[index])
+                    CourseCard(
+                        course = filteredCourses[index],
+                        onClick = { onCourseClick(originalIndex) },
+                        onInfoClick = { infoCourseIndex = originalIndex },
+                    )
+                }
             }
         }
     }

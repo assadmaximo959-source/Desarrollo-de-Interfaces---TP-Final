@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Drafts
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -25,9 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,6 +44,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 private val teachers = listOf("Heliana Vera", "Gonzalo Rivas", "Liliana Romano", "Federico Pileci")
+private const val MAX_CHARS = 1000
+private const val MAX_FILE_SIZE_MB = 10
 
 @Suppress("ktlint:standard:function-naming", "DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +59,9 @@ fun PracticeSubmitScreen(
     var selectedTeacher by remember { mutableStateOf(teachers.first()) }
     var expanded by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
+    var charCount by remember { mutableIntStateOf(0) }
     var isGroupDelivery by remember { mutableStateOf(false) }
+    var hasAttachment by remember { mutableStateOf(false) }
 
     Column(
         modifier =
@@ -94,7 +104,7 @@ fun PracticeSubmitScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
                     text = "Destinatario",
@@ -137,15 +147,46 @@ fun PracticeSubmitScreen(
                 ) {
                     OutlinedTextField(
                         value = message,
-                        onValueChange = { message = it },
+                        onValueChange = {
+                            if (it.length <= MAX_CHARS) {
+                                message = it
+                                charCount = it.length
+                            }
+                        },
                         placeholder = { Text("Escribir mensaje...") },
                         shape = RoundedCornerShape(12.dp),
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .weight(0.75f),
+                                .weight(0.7f),
                         textStyle = MaterialTheme.typography.bodyMedium,
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "$charCount/$MAX_CHARS",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (charCount >= MAX_CHARS) MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        if (hasAttachment) {
+                            Text(
+                                text = "1 archivo adjunto",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+
+                    HorizontalDividerWithSpacer()
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -156,25 +197,30 @@ fun PracticeSubmitScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-
                         Spacer(modifier = Modifier.weight(1f))
-
                         Checkbox(
                             checked = isGroupDelivery,
                             onCheckedChange = { isGroupDelivery = it },
                         )
                     }
 
-                    Spacer(modifier = Modifier.weight(0.25f))
+                    Spacer(modifier = Modifier.weight(0.1f))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,
                     ) {
-                        IconButton(onClick = onAttachFile) {
+                        IconButton(onClick = { hasAttachment = !hasAttachment }) {
                             Icon(
-                                imageVector = Icons.Default.AttachFile,
+                                imageVector = if (hasAttachment) Icons.Default.Description else Icons.Default.AttachFile,
                                 contentDescription = "Adjuntar archivo",
+                                tint = if (hasAttachment) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        IconButton(onClick = { }) {
+                            Icon(
+                                imageVector = Icons.Default.Image,
+                                contentDescription = "Adjuntar imagen",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -196,6 +242,22 @@ fun PracticeSubmitScreen(
                 }
             }
         }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun HorizontalDividerWithSpacer() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        androidx.compose.material3.HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+        )
     }
 }
 

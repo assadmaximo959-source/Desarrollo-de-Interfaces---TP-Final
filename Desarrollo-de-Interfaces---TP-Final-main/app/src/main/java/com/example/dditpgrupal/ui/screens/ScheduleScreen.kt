@@ -3,15 +3,20 @@ package com.example.dditpgrupal.ui.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dditpgrupal.data.Course
@@ -45,6 +51,7 @@ import com.example.dditpgrupal.data.dummyCourseList
 import com.example.dditpgrupal.ui.components.CalendarAlertCard
 import com.example.dditpgrupal.ui.components.CourseMenu
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("ktlint:standard:function-naming")
@@ -67,20 +74,21 @@ fun ScheduleScreen(course: Course) {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.CalendarMonth,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(28.dp),
             )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Fechas",
-                style = MaterialTheme.typography.titleLarge,
+                text = "Calendario",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 12.dp),
             )
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = {
@@ -94,22 +102,6 @@ fun ScheduleScreen(course: Course) {
             }
         }
 
-        val sampleActivities =
-            listOf(
-                "Parcial 1" to Icons.AutoMirrored.Filled.Assignment,
-                "Entrega TP" to Icons.Default.Description,
-                "Recuperatorio" to Icons.Default.Edit,
-                "Trabajo Final" to Icons.Default.CheckCircle,
-            )
-
-        val sampleTopics =
-            listOf(
-                listOf("Unidad 1: Introducción", "Unidad 2: Conceptos avanzados", "Unidad 3: Práctica integradora"),
-                listOf("Consigna", "Formato de entrega", "Fecha límite", "Rúbrica de evaluación"),
-                listOf("Temas a recuperar"),
-                listOf("Definición del proyecto", "Planificación", "Implementación", "Pruebas", "Documentación", "Presentación final"),
-            )
-
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -117,13 +109,30 @@ fun ScheduleScreen(course: Course) {
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                val referenceDate = LocalDate.of(2026, 6, 10)
+                val referenceDate = LocalDate.now()
 
                 course.importantDates.forEachIndexed { index, date ->
+                    val sampleActivities =
+                        listOf(
+                            "Parcial 1" to Icons.AutoMirrored.Filled.Assignment,
+                            "Entrega TP" to Icons.Default.Description,
+                            "Recuperatorio" to Icons.Default.Edit,
+                            "Trabajo Final" to Icons.Default.CheckCircle,
+                        )
+                    val sampleTopics =
+                        listOf(
+                            listOf("Unidad 1: Introducción", "Unidad 2: Conceptos avanzados", "Unidad 3: Práctica integradora"),
+                            listOf("Consigna", "Formato de entrega", "Fecha límite", "Rúbrica de evaluación"),
+                            listOf("Temas a recuperar"),
+                            listOf("Definición del proyecto", "Planificación", "Implementación", "Pruebas", "Documentación", "Presentación final"),
+                        )
+
                     val (activityName, icon) = sampleActivities[index % sampleActivities.size]
                     val topics = sampleTopics[index % sampleTopics.size]
                     val isExpanded = index in expandedItems
-                    val isPast = date.isBefore(referenceDate)
+                    val daysUntil = ChronoUnit.DAYS.between(referenceDate, date)
+                    val isPast = daysUntil < 0
+                    val isSoon = daysUntil in 0..7
                     val pastAlpha = if (isPast) 0.38f else 1f
 
                     Column(
@@ -133,6 +142,19 @@ fun ScheduleScreen(course: Course) {
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .background(
+                                        when {
+                                            isPast -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                            isSoon -> MaterialTheme.colorScheme.error
+                                            else -> MaterialTheme.colorScheme.tertiary
+                                        },
+                                        CircleShape,
+                                    ),
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
@@ -140,23 +162,32 @@ fun ScheduleScreen(course: Course) {
                                     if (isPast) {
                                         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                                     } else {
-                                        @Suppress("ktlint:standard:max-line-length")
                                         MaterialTheme.colorScheme.tertiary
                                     },
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(22.dp),
                             )
                             Text(
                                 text = activityName,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = pastAlpha),
-                                modifier = Modifier.padding(start = 12.dp, end = 8.dp),
+                                modifier = Modifier.padding(start = 8.dp, end = 8.dp),
                             )
                             Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                text = "${date.dayOfMonth}/${date.monthValue}/${date.year}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = pastAlpha),
-                            )
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "${date.dayOfMonth}/${date.monthValue}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = pastAlpha),
+                                )
+                                if (!isPast && isSoon) {
+                                    Text(
+                                        text = if (daysUntil == 0L) "Hoy" else "Faltan $daysUntil d\u00edas",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            }
                             IconButton(onClick = {
                                 expandedItems = if (isExpanded) expandedItems - index else expandedItems + index
                             }) {
@@ -177,7 +208,7 @@ fun ScheduleScreen(course: Course) {
                                 topics.forEach { topic ->
                                     Text(
                                         text = topic,
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = pastAlpha),
                                     )
                                 }
@@ -188,7 +219,7 @@ fun ScheduleScreen(course: Course) {
                     if (index < course.importantDates.lastIndex) {
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.outline,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                         )
                     }
                 }

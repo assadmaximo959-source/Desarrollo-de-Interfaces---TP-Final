@@ -15,6 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -28,6 +31,7 @@ import com.example.dditpgrupal.sealedclass.navigationRouteList
 import com.example.dditpgrupal.ui.components.CourseMenu
 import com.example.dditpgrupal.ui.screens.CourseScreen
 import com.example.dditpgrupal.ui.screens.HomeScreen
+import com.example.dditpgrupal.ui.screens.LoginScreen
 import com.example.dditpgrupal.ui.screens.MessagesScreen
 import com.example.dditpgrupal.ui.screens.ProfileScreen
 import com.example.dditpgrupal.ui.theme.DDITPGrupalTheme
@@ -49,12 +53,13 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
+    var isLoggedIn by remember { mutableStateOf(false) }
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val mainRoutes = navigationRouteList.map { it.route }
-    val showBottomBar = currentRoute in mainRoutes
+    val showBottomBar = isLoggedIn && currentRoute in mainRoutes
 
     Scaffold(
         bottomBar = {
@@ -85,10 +90,30 @@ fun AppNavigation() {
         Box(modifier = Modifier.padding(innerPadding)) {
             NavHost(
                 navController = navController,
-                startDestination = "home",
+                startDestination = if (isLoggedIn) "home" else "login",
             ) {
+                composable("login") {
+                    LoginScreen(
+                        onLogin = {
+                            isLoggedIn = true
+                            navController.navigate("home") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        },
+                    )
+                }
                 composable("home") {
-                    HomeScreen()
+                    HomeScreen(
+                        onProfileClick = {
+                            navController.navigate("profile")
+                        },
+                        onLogout = {
+                            isLoggedIn = false
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        },
+                    )
                 }
                 composable("courses") {
                     CourseScreen(
@@ -111,7 +136,9 @@ fun AppNavigation() {
                     MessagesScreen()
                 }
                 composable("profile") {
-                    ProfileScreen()
+                    ProfileScreen(
+                        onBackClick = { navController.popBackStack() },
+                    )
                 }
             }
         }
