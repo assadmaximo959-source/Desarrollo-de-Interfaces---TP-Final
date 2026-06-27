@@ -28,11 +28,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.dditpgrupal.data.dummyCourseList
 import com.example.dditpgrupal.sealedclass.navigationRouteList
+import com.example.dditpgrupal.data.enums.PracticeStatus
 import com.example.dditpgrupal.ui.components.CourseMenu
 import com.example.dditpgrupal.ui.screens.CourseScreen
 import com.example.dditpgrupal.ui.screens.HomeScreen
 import com.example.dditpgrupal.ui.screens.LoginScreen
 import com.example.dditpgrupal.ui.screens.MessagesScreen
+import com.example.dditpgrupal.ui.screens.PracticeFilterScreen
 import com.example.dditpgrupal.ui.screens.ProfileScreen
 import com.example.dditpgrupal.ui.theme.DDITPGrupalTheme
 
@@ -113,6 +115,41 @@ fun AppNavigation() {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
+                        onCoursesClick = {
+                            navController.navigate("courses") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onPendingClick = {
+                            navController.navigate("practice-filter/pending") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onCorrectedClick = {
+                            navController.navigate("practice-filter/corrected") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                    )
+                }
+                composable("practice-filter/{filter}") { backStackEntry ->
+                    val filter = backStackEntry.arguments?.getString("filter") ?: "pending"
+                    PracticeFilterScreen(
+                        initialFilter = if (filter == "corrected") PracticeStatus.CORREGIDA else PracticeStatus.PENDIENTE,
+                        onBackClick = { navController.popBackStack() },
+                        onPracticeClick = { _ -> },
                     )
                 }
                 composable("courses") {

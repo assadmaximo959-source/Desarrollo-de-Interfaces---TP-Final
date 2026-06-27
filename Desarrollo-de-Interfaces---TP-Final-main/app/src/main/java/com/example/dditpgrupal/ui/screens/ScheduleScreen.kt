@@ -58,11 +58,10 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun ScheduleScreen(course: Course) {
     Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CalendarAlertCard()
@@ -70,62 +69,70 @@ fun ScheduleScreen(course: Course) {
         var expandedItems by remember { mutableStateOf(setOf<Int>()) }
         val allExpanded = expandedItems.size == course.importantDates.size
 
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Default.CalendarMonth,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(28.dp),
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Calendario",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = {
-                expandedItems = if (allExpanded) emptySet() else course.importantDates.indices.toSet()
-            }) {
-                Icon(
-                    imageVector = if (allExpanded) Icons.Default.UnfoldLess else Icons.Default.UnfoldMore,
-                    contentDescription = if (allExpanded) "Contraer todo" else "Expandir todo",
-                    tint = MaterialTheme.colorScheme.tertiary,
-                )
-            }
-        }
-
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(20.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Calendario académico",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(onClick = {
+                        expandedItems = if (allExpanded) emptySet() else course.importantDates.indices.toSet()
+                    }) {
+                        Icon(
+                            imageVector = if (allExpanded) Icons.Default.UnfoldLess else Icons.Default.UnfoldMore,
+                            contentDescription = if (allExpanded) "Contraer todo" else "Expandir todo",
+                            tint = MaterialTheme.colorScheme.tertiary,
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 val referenceDate = LocalDate.now()
 
                 course.importantDates.forEachIndexed { index, date ->
-                    val sampleActivities =
-                        listOf(
-                            "Parcial 1" to Icons.AutoMirrored.Filled.Assignment,
-                            "Entrega TP" to Icons.Default.Description,
-                            "Recuperatorio" to Icons.Default.Edit,
-                            "Trabajo Final" to Icons.Default.CheckCircle,
-                        )
-                    val sampleTopics =
-                        listOf(
-                            listOf("Unidad 1: Introducción", "Unidad 2: Conceptos avanzados", "Unidad 3: Práctica integradora"),
-                            listOf("Consigna", "Formato de entrega", "Fecha límite", "Rúbrica de evaluación"),
-                            listOf("Temas a recuperar"),
-                            listOf("Definición del proyecto", "Planificación", "Implementación", "Pruebas", "Documentación", "Presentación final"),
-                        )
+                    val sampleActivities = listOf(
+                        "Parcial 1" to Icons.AutoMirrored.Filled.Assignment,
+                        "Entrega TP" to Icons.Default.Description,
+                        "Recuperatorio" to Icons.Default.Edit,
+                        "Trabajo Final" to Icons.Default.CheckCircle,
+                    )
+                    val sampleTopics = listOf(
+                        listOf("Unidad 1: Introducción", "Unidad 2: Conceptos avanzados", "Unidad 3: Práctica integradora"),
+                        listOf("Consigna", "Formato de entrega", "Fecha límite", "Rúbrica de evaluación"),
+                        listOf("Temas a recuperar"),
+                        listOf("Definición del proyecto", "Planificación", "Implementación", "Pruebas", "Documentación", "Presentación final"),
+                    )
 
                     val (activityName, icon) = sampleActivities[index % sampleActivities.size]
                     val topics = sampleTopics[index % sampleTopics.size]
@@ -158,33 +165,34 @@ fun ScheduleScreen(course: Course) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
-                                tint =
-                                    if (isPast) {
-                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-                                    } else {
-                                        MaterialTheme.colorScheme.tertiary
-                                    },
+                                tint = if (isPast) {
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                                } else {
+                                    MaterialTheme.colorScheme.tertiary
+                                },
                                 modifier = Modifier.size(22.dp),
                             )
-                            Text(
-                                text = activityName,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = pastAlpha),
-                                modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Column(horizontalAlignment = Alignment.End) {
+                            Column(modifier = Modifier.padding(start = 8.dp)) {
                                 Text(
-                                    text = "${date.dayOfMonth}/${date.monthValue}",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    text = activityName,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = pastAlpha),
                                 )
-                                if (!isPast && isSoon) {
+                                Text(
+                                    text = "${date.dayOfMonth}/${date.monthValue}/${date.year}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = pastAlpha),
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            Column(horizontalAlignment = Alignment.End) {
+                                if (!isPast) {
                                     Text(
-                                        text = if (daysUntil == 0L) "Hoy" else "Faltan $daysUntil d\u00edas",
+                                        text = if (daysUntil == 0L) "Hoy" else "-$daysUntil d\u00edas",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSoon) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
                                     )
                                 }
                             }
@@ -206,11 +214,19 @@ fun ScheduleScreen(course: Course) {
                                 verticalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 topics.forEach { topic ->
-                                    Text(
-                                        text = topic,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = pastAlpha),
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                            .size(4.dp)
+                                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = pastAlpha), CircleShape),
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = topic,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = pastAlpha),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -218,8 +234,8 @@ fun ScheduleScreen(course: Course) {
 
                     if (index < course.importantDates.lastIndex) {
                         HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                            modifier = Modifier.padding(vertical = 6.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                         )
                     }
                 }
