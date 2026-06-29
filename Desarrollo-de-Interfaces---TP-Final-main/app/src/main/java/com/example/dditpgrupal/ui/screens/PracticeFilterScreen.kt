@@ -17,8 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -55,9 +55,22 @@ fun PracticeFilterScreen(
 ) {
     var selectedPractice by remember { mutableStateOf<Practice?>(null) }
     var selectedFilter by remember { mutableIntStateOf(if (initialFilter == PracticeStatus.PENDIENTE) 0 else 1) }
-    val filters = listOf(PracticeStatus.PENDIENTE, PracticeStatus.CORREGIDA)
-    val filteredPractices = practices.filter { it.status == filters[selectedFilter] }
-    val counts = filters.map { status -> practices.count { it.status == status } }
+    val filters = listOf(
+        PracticeStatus.PENDIENTE,
+        PracticeStatus.ENTREGADA,
+        PracticeStatus.CORREGIDA,
+        PracticeStatus.SOLICITADA,
+        PracticeStatus.ACEPTADA,
+        PracticeStatus.RECHAZADA,
+        PracticeStatus.REVISION,
+    )
+    val filterGroups = listOf(
+        "Pendientes" to listOf(PracticeStatus.PENDIENTE, PracticeStatus.ENTREGADA),
+        "Corregidas" to listOf(PracticeStatus.CORREGIDA, PracticeStatus.ACEPTADA),
+        "Revisión" to listOf(PracticeStatus.SOLICITADA, PracticeStatus.RECHAZADA, PracticeStatus.REVISION),
+    )
+    val filteredPractices = practices.filter { it.status in filterGroups[selectedFilter].second }
+    val counts = filterGroups.map { (_, statuses) -> practices.count { it.status in statuses } }
 
     selectedPractice?.let { practice ->
         PracticeStatusScreen(
@@ -100,10 +113,14 @@ fun PracticeFilterScreen(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            filters.forEachIndexed { index, status ->
+            filterGroups.forEachIndexed { index, (title, _) ->
                 FilterButton(
-                    icon = if (status == PracticeStatus.PENDIENTE) Icons.Default.Schedule else Icons.Default.CheckCircle,
-                    title = if (status == PracticeStatus.PENDIENTE) "Pendientes" else "Corregidas",
+                    icon = when (index) {
+                        0 -> Icons.Default.Schedule
+                        1 -> Icons.Default.CheckCircle
+                        else -> Icons.Default.RateReview
+                    },
+                    title = title,
                     count = counts[index],
                     isSelected = selectedFilter == index,
                     onClick = { selectedFilter = index },
@@ -121,14 +138,22 @@ fun PracticeFilterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(
-                    imageVector = if (selectedFilter == 0) Icons.Default.Schedule else Icons.Default.Star,
+                    imageVector = when (selectedFilter) {
+                        0 -> Icons.Default.Schedule
+                        1 -> Icons.Default.Star
+                        else -> Icons.Default.RateReview
+                    },
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                     modifier = Modifier.size(64.dp),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = if (selectedFilter == 0) "No hay prácticas pendientes" else "No hay prácticas corregidas",
+                    text = when (selectedFilter) {
+                        0 -> "No hay prácticas pendientes"
+                        1 -> "No hay prácticas corregidas"
+                        else -> "No hay prácticas en revisión"
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

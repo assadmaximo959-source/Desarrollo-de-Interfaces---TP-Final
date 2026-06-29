@@ -4,4 +4,8 @@ enum class PracticeStatus {
     PENDIENTE,
     ENTREGADA,
     CORREGIDA,
+    SOLICITADA,
+    ACEPTADA,
+    RECHAZADA,
+    REVISION,
 }

@@ -143,8 +143,8 @@ private fun SystemStatusCards(
     onPendingClick: () -> Unit,
     onCorrectedClick: () -> Unit,
 ) {
-    val pendingCount = dummyPracticeList.count { it.status == PracticeStatus.PENDIENTE }
-    val correctedCount = dummyPracticeList.count { it.status == PracticeStatus.CORREGIDA }
+    val pendingCount = dummyPracticeList.count { it.status in listOf(PracticeStatus.PENDIENTE, PracticeStatus.ENTREGADA) }
+    val correctedCount = dummyPracticeList.count { it.status in listOf(PracticeStatus.CORREGIDA, PracticeStatus.ACEPTADA) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
