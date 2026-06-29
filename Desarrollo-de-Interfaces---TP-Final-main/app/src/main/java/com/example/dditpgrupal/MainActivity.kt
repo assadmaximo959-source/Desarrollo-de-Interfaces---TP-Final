@@ -149,7 +149,6 @@ fun AppNavigation() {
                     PracticeFilterScreen(
                         initialFilter = if (filter == "corrected") PracticeStatus.CORREGIDA else PracticeStatus.PENDIENTE,
                         onBackClick = { navController.popBackStack() },
-                        onPracticeClick = { _ -> },
                     )
                 }
                 composable("courses") {

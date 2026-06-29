@@ -30,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,10 +53,19 @@ fun PracticeFilterScreen(
     onBackClick: () -> Unit = {},
     onPracticeClick: (Practice) -> Unit = {},
 ) {
+    var selectedPractice by remember { mutableStateOf<Practice?>(null) }
     var selectedFilter by remember { mutableIntStateOf(if (initialFilter == PracticeStatus.PENDIENTE) 0 else 1) }
     val filters = listOf(PracticeStatus.PENDIENTE, PracticeStatus.CORREGIDA)
     val filteredPractices = practices.filter { it.status == filters[selectedFilter] }
     val counts = filters.map { status -> practices.count { it.status == status } }
+
+    selectedPractice?.let { practice ->
+        PracticeStatusScreen(
+            practice = practice,
+            onBackClick = { selectedPractice = null },
+        )
+        return
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -133,8 +143,8 @@ fun PracticeFilterScreen(
                 items(filteredPractices, key = { it.name }) { practice ->
                     PracticeCard(
                         practice = practice,
-                        onSubmitClick = { onPracticeClick(practice) },
-                        onViewStatusClick = { onPracticeClick(practice) },
+                        onSubmitClick = { selectedPractice = practice },
+                        onViewStatusClick = { selectedPractice = practice },
                     )
                 }
             }
